@@ -199,6 +199,7 @@ export interface UpdateNotebookChatSessionRequest {
 }
 
 export interface SendNotebookChatMessageRequest {
+  notebook_id: string
   session_id: string
   message: string
   context: {

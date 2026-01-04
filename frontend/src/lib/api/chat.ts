@@ -47,16 +47,39 @@ export const chatApi = {
     await apiClient.delete(`/chat/sessions/${sessionId}`)
   },
 
-  // Messaging (synchronous, no streaming)
+  // Messaging (synchronous, no streaming) - uses Claude Agent SDK
   sendMessage: async (data: SendNotebookChatMessageRequest) => {
+    // Call v2 agent endpoint
     const response = await apiClient.post<{
       session_id: string
-      messages: NotebookChatMessage[]
+      response: string
+      messages: Array<{ role: string; content: string }>
+      tool_calls_made: number
+      cost_usd: number
+      provider: string
+      error: string | null
     }>(
-      `/chat/execute`,
-      data
+      `/v2/chat/execute`,
+      {
+        notebook_id: data.notebook_id,
+        session_id: data.session_id,
+        message: data.message,
+        model_override: data.model_override
+      }
     )
-    return response.data
+
+    // Map response to expected format
+    const messages: NotebookChatMessage[] = response.data.messages.map((msg, idx) => ({
+      id: `msg-${Date.now()}-${idx}`,
+      type: msg.role === 'user' ? 'human' : 'ai',
+      content: msg.content,
+      timestamp: new Date().toISOString()
+    }))
+
+    return {
+      session_id: response.data.session_id,
+      messages
+    }
   },
 
   buildContext: async (data: BuildContextRequest) => {

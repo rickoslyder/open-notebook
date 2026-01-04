@@ -216,6 +216,7 @@ export function useNotebookChat({ notebookId, sources, notes, contextSelections 
       // Build context and send message
       const context = await buildContext()
       const response = await chatApi.sendMessage({
+        notebook_id: notebookId,
         session_id: sessionId,
         message,
         context,
