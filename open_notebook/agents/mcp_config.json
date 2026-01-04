@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "open-notebook": {
+      "command": "/app/.venv/bin/python",
+      "args": ["-m", "open_notebook.agents.mcp_server"],
+      "cwd": "/app",
+      "env": {
+        "PYTHONPATH": "/app"
+      }
+    }
+  }
+}

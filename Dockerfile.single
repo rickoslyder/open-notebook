@@ -45,6 +45,14 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
 # Install SurrealDB
 RUN curl --proto '=https' --tlsv1.2 -sSf https://install.surrealdb.com | sh
 
+# Install Claude Agent SDK globally for programmatic access
+RUN npm install -g @anthropic-ai/claude-code
+
+# Create non-root user for Claude CLI (required for --dangerously-skip-permissions)
+RUN useradd -m -s /bin/bash claudeuser \
+    && mkdir -p /home/claudeuser/.claude \
+    && chown -R claudeuser:claudeuser /home/claudeuser
+
 # Install uv (optional but helpful for some scripts)
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
@@ -61,6 +69,9 @@ COPY --from=frontend-builder /app/frontend/public /app/frontend/public
 
 # Setup directories and permissions
 RUN mkdir -p /app/data /mydata
+
+# Make application directories readable by claudeuser for Claude CLI and MCP server
+RUN chmod -R o+rX /app/open_notebook /app/.venv
 
 # Ensure wait-for-api script is executable
 RUN chmod +x /app/scripts/wait-for-api.sh
